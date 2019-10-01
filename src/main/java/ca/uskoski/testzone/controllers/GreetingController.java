@@ -11,4 +11,10 @@ public class GreetingController
 	{
 		return "Hello world!";
 	}
+
+	@GetMapping(path = "/")
+	public String home()
+	{
+		return "Home";
+	}
 }
