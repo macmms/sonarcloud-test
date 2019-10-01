@@ -1,0 +1,8 @@
+language: java
+addons:
+  sonarcloud:
+    organization: "jakeuskoski" # the key of the org you chose at step #3
+    token:
+      secure: SONAR_TOKEN
+script:
+  - mvn clean verify sonar:sonar -Pcoverage -Dsonar.projectKey=JakeUskoski_testzone
