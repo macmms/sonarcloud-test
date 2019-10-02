@@ -5,7 +5,7 @@ phases:
     commands:
       - echo Application Build started on `date`
       - docker build --no-cache --tag ${SERVICE_NAME}-test -f "$(pwd)/docker/test/Dockerfile" .
-      - docker run -v "$(pwd)/target:/target" -v "$(pwd)/docker/m2:/root/.m2" ${SERVICE_NAME}-test
+      - docker run -v "$(pwd)/target:/target" -v "$(pwd)/docker/m2:/root/.m2" -e "SONAR_TOKEN=${SONAR_TOKEN}" ${SERVICE_NAME}-test
       - echo Build completed and published on `date`
   post_build:
     commands:
