@@ -3,4 +3,4 @@ addons:
   sonarcloud:
     organization: "jakeuskoski" # the key of the org you chose at step #3
 script:
-  - mvn clean verify sonar:sonar -Pcoverage
+  - mvn clean verify sonar:sonar
