@@ -1,0 +1,13 @@
+version: 0.2
+
+phases:
+  build:
+    commands:
+      - echo Application Build started on `date`
+      - docker build --no-cache --tag ${SERVICE_NAME}-test -f "$(pwd)/docker/test/Dockerfile" .
+      - docker run -v "$(pwd)/target:/target" -v "$(pwd)/docker/m2:/root/.m2" ${SERVICE_NAME}-test
+      - echo Build completed and published on `date`
+  post_build:
+    commands:
+      - echo completed on `date`
+      - docker logout

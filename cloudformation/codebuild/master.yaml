@@ -1,0 +1,102 @@
+Description: >
+  Template to generate a CodeBuild project for building and testing a repository
+  The CodeBuild project created also contains webhooks that trigger build and test on every branch
+  whenever a push is made or a pull request is created.
+  The webhook triggers are disabled for develop and master branches.
+  ref: https://docs.aws.amazon.com/codebuild/latest/userguide/sample-github-pull-request.html
+Parameters:
+
+  Name:
+    Description: Environment name for the codebuild project
+    Type: String
+    Default: jake-sonarcloud-repo-PR
+
+  ServiceName:
+    Description: Name of the service
+    Type: String
+    Default: jake-sonarcloud-repo
+
+  SonarCloudToken:
+    Type: String
+    Default: "{{resolve:ssm:SonarCloudToken:1}}"
+
+Resources:
+
+  CodeBuildProject:
+    Type: AWS::CodeBuild::Project
+    Properties:
+      Name: !Ref Name
+      ServiceRole: !Ref CodeBuildRole
+      Artifacts:
+        Type: NO_ARTIFACTS
+      Environment:
+        Type: LINUX_CONTAINER
+        ComputeType: BUILD_GENERAL1_SMALL
+        Image: "aws/codebuild/ruby:2.5.3"
+        PrivilegedMode: true
+        EnvironmentVariables:
+          - Name: SERVICE_NAME
+            Type: PLAINTEXT
+            Value: !Ref ServiceName
+          - Name: SONAR_TOKEN
+            Type: PLAINTEXT
+            Value: !Ref SonarCloudToken
+      Source:
+        Type: GITHUB
+        BuildSpec: "buildspec.yml"
+        Location: "https://github.com/JakeUskoski/testzone"
+        GitCloneDepth: 1
+      TimeoutInMinutes: 45
+      Cache:
+        Type: LOCAL
+        Modes:
+          - LOCAL_SOURCE_CACHE
+          - LOCAL_CUSTOM_CACHE
+          - LOCAL_DOCKER_LAYER_CACHE
+      Triggers:
+        Webhook: true
+        FilterGroups:
+          - - Type: EVENT
+              Pattern: PULL_REQUEST_CREATED,PULL_REQUEST_UPDATED
+            - Type: BASE_REF
+              Pattern: ^refs/heads/.*
+              ExcludeMatchedPattern: false
+          - - Type: EVENT
+              Pattern: PUSH
+            - Type: HEAD_REF
+              Pattern: ^refs/heads/develop$
+              ExcludeMatchedPattern: false
+          - - Type: EVENT
+              Pattern: PUSH
+            - Type: HEAD_REF
+              Pattern: ^refs/heads/master$
+              ExcludeMatchedPattern: false
+      BadgeEnabled: true
+      Tags:
+        - Key: Name
+          Value: !Ref Name
+
+  CodeBuildRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Action:
+              - sts:AssumeRole
+            Principal:
+              Service:
+                - codebuild.amazonaws.com
+      Path: /
+      Policies:
+        - PolicyName: SonarCloudCodeBuildAccess
+          PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+              - Effect: Allow
+                Action:
+                  - logs:*
+                  - ec2:*
+                Resource:
+                  - "*"
