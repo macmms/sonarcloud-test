@@ -1,6 +1,0 @@
-language: java
-addons:
-  sonarcloud:
-    organization: "jakeuskoski" # the key of the org you chose at step #3
-script:
-  - mvn clean verify sonar:sonar
