@@ -44,7 +44,7 @@ Resources:
       Source:
         Type: GITHUB
         BuildSpec: "buildspec.yml"
-        Location: "https://github.com/JakeUskoski/testzone"
+        Location: "https://github.com/macmms/sonarcloud-test"
         GitCloneDepth: 1
       TimeoutInMinutes: 45
       Cache:
